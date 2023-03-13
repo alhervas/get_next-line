@@ -20,7 +20,10 @@
 # include <string.h>
 # include <unistd.h>
 
-int	ft_strlen(const char *str);
+#ifndef BUFFER_SIZE	
+ # define BUFFER_SIZE 42
+#endif
+int		ft_strlen(const char *str);
 char	*ft_strchr(const char *str, int c);
 
 #endif

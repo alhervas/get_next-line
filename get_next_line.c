@@ -18,17 +18,17 @@ char	*get_next_line(int fd)
 	int		bytes;
 	char	*new_fd;
 
-	cadena = malloc(1000);
+	cadena = malloc(BUFFER_SIZE + 1);
 	new_fd = malloc(1000);
-	bytes = read(fd, cadena, 1000);
+	bytes = read(fd, cadena, BUFFER_SIZE);
 	new_fd = ft_strchr(cadena, '\n') + 1;
-	return(new_fd);
+	return(cadena);
 }
 
 int	main()
 {
 	int		fd;
-	char	*c;
+	//char	*c;
 
 	fd = open("aaa.txt", O_RDONLY);
 	printf("%s", get_next_line(fd));
