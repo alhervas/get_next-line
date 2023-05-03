@@ -22,12 +22,12 @@ char	*get_next_line(int fd)
 	new_fd = malloc(1000);
 	bytes = read(fd, cadena, BUFFER_SIZE);
 	new_fd = ft_strchr(cadena, '\n') + 1;
-	return(cadena);
+	return (new_fd);
 }
 
-int	main()
+int	main(void)
 {
-	int		fd;
+	int fd;
 	//char	*c;
 
 	fd = open("aaa.txt", O_RDONLY);
