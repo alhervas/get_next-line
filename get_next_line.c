@@ -10,153 +10,116 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdlib.h>
+#include <fcntl.h>
 #include "get_next_line.h"
 
-
-int	enter(char *sta)
+char	*get_left(char *str)
 {
-	int  i;
+	int		pos;
+	char	*array;
 
-	i = -1;
-	while(sta[++i])
-	{
-		if(sta[i] == '\n')
-			return (0);
-	}
-	return (1);
+	pos = 0;
+	while (str[pos] != '\n' && str[pos] != '\0')
+		pos++;
+	if (str[pos] == '\n')
+		pos++;
+	array = NULL;
+	if (pos)
+		array = ft_substr(str, 0, pos);
+	return (array);
 }
 
-char	*read_f(int fd, char *sta)
+char	*get_rest(char *str)
 {
-	int		a;
-	int		i;
-	char	buffer[BUFFER_SIZE + 1];
-	char	*aux;
+	int		pos;
+	int		r_pos;
+	int		count;
+	char	*array;
 
-	a = 1;
-	while(a > 0)
-	{
-		if (!enter(sta))
-			return (sta);
-		a = read(fd, buffer, BUFFER_SIZE);
-		//printf("A-> %d\n", a);
-		if (a == 0)
-			return (sta);
-		if (a < 0)
-		{
-			free (sta);
-			return (NULL);
-		}
-		buffer[a] = '\0';
-		aux = ft_strjoin(sta, buffer);
-		i = -1;
-		while (sta[++i])
-		{
-			if(sta[i] == '\n')
-			{
-				a = -1;
-				break;
-			}
-		}
-	}
-	//free (str);
-	return (sta);
+	pos = 0;
+	r_pos = 0;
+	count = 0;
+	if (!(ft_strchr(str, '\n')))
+		return (free(str), NULL);
+	while (str[pos] != '\n')
+		pos++;
+	pos++;
+	r_pos = pos;
+	while (str[pos++] != '\0')
+		count++;
+	array = ft_substr(str, r_pos, count);
+	free(str);
+	return (array);
 }
 
-char	*ft_line(char *buffer)
+char	*free_all(char *str_return, char *first)
 {
-	char *aux;
-	int i;
-
-	if (!buffer[0])
-		return (NULL);
-	i = -1;
-	while (buffer[++i])
-	{
-		if (buffer[i] == '\n')
-		{
-			i++;
-			break;
-		}
-	}
-	if (!buffer[i])
-		return (buffer);
-	aux = malloc (sizeof (char *) + i + 1);
-	i = -1;
-	while (buffer[++i])
-	{
-		aux[i] = buffer[i];
-		if (buffer[i] == '\n')
-			break;
-	}
-	aux[i + 1] = '\0';
-	return(aux);
+	(void)first;
+	free (str_return);
+	return (NULL);
 }
 
-char	*ft_next(char *buffer)
+static char	*complete_array(int fd, char *first)
 {
-	char *aux;
-	int i;
-	int	j;
+	char	aux[BUFFER_SIZE + 1];
+	char	*str_return;
+	int		state;
 
-	i = -1;
-	while (buffer[++i])
+	str_return = ft_calloc(BUFFER_SIZE, 1);
+	if (first)
 	{
-		if (buffer[i] == '\n')
-			break;
+		free(str_return);
+		str_return = ft_substr(first, 0, ft_strlen(first));
+		free(first);
+		first = NULL;
 	}
-	if (!buffer[i])
-		return (NULL);
-	j = i;
-	while (buffer[j])
-		j++;
-	
-	aux = malloc (sizeof (char *) + (j - i) + 1);
-	aux[j - i] = '\0';
-	j = -1;
-	while (buffer[i++])
+	state = 1;
+	while (!ft_strchr(str_return, '\n') && state)
 	{
-		aux[++j] = buffer[i];
-		if (buffer[i] == '\n')
-			break;
+		state = read(fd, aux, BUFFER_SIZE);
+		if (state > 0)
+		{
+			aux[state] = '\0';
+			str_return = ft_strjoin(str_return, aux);
+		}
+		if (state < 0)
+			return (free_all (str_return, first));
 	}
-	return(aux);
+	return (str_return);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*sta;
-	char		*line;
-	char		*aux;
+	char		*left_str;
+	static char	*aux;
 
-	if (fd < 0 || BUFFER_SIZE  < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if (!sta)
-	{
-		sta = malloc(sizeof(char *) * 1);
-		*sta = '\0';
-	}
-	aux = read_f (fd, sta);
+	aux = complete_array(fd, aux);
 	if (!aux)
-		return(NULL);
-	line = ft_line(aux);
-	sta = ft_next(aux);
-	return (line);
+		return (NULL);
+	left_str = get_left (aux);
+	aux = get_rest (aux);
+	return (left_str);
 }
 
-/* int	main(void)
-{
-	int fd;
-	char	*c;
-	int i = 0;
-
-	fd = open("aaa.txt", O_RDONLY);
-	c = get_next_line(fd);
-	while (c && i++ < 300)
-	{
-		printf("%s", c);
-		c = get_next_line(fd);
-	}
-	system("leaks -q a.out");
-	close(fd);
-} */
+/*  int main()
+ {
+	 	char *line;
+int fd;
+ 	int i = 0;
+ 	fd = open("texto.txt", O_RDONLY);
+ 	line = get_next_line(fd);
+ 	while(line) // && i < 5)
+ 	{
+ 		printf("%s", line);
+ 		// write(1, line, ft_strlen(line));
+ 		free(line); 		
+		// free(line);
+	line = get_next_line(fd);
+	++i;
+ 	}
+ 	// free(line);
+ 	return(0);
+ } */

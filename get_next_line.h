@@ -12,22 +12,31 @@
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
-# include <fcntl.h>
-# include <sys/stat.h>
-# include <sys/types.h>
-# include <stdio.h>
-# include <stdlib.h>
-# include <string.h>
 # include <unistd.h>
+# include <stdlib.h>
+# include <sys/types.h>
+# include <sys/uio.h>
+# include <stdlib.h>
 
-#ifndef BUFFER_SIZE	
- # define BUFFER_SIZE 42
-#endif
-int		ft_strlen(const char *str);
-char	*ft_strchr(const char *str, int c);
-void	*ft_calloc(size_t nmemb, size_t size);
-char	*ft_strjoin(char const *s1, char const *s2);
-void	ft_bzero(void *b, size_t len);
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 1
+# endif
+
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE BUFSIZ
+# endif 
+
+# if BUFFER_SIZE > 9223372036854775806 
+#  undef BUFFER_SIZE
+#  define BUFFER_SIZE 1
+# endif
+
 char	*get_next_line(int fd);
+char	*ft_strjoin(char *s1, char *s2);
+void	*ft_calloc(int size, int num);
+char	*ft_strchr(const char *s, int c);
+char	*ft_substr(char const *s, unsigned int start, size_t len);
+char	*ft_strdup(const char *s1);
+size_t	ft_strlen(const char *str);
 
 #endif
